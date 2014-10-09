@@ -1,0 +1,6 @@
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.csprojResolveAssemblyReference.cache
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\ShaleCo.Cryptography.dll
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\ShaleCo.Cryptography.pdb
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.dll
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.pdb
+C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\prime-numbers.csv
