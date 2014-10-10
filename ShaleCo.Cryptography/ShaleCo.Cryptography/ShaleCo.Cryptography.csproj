@@ -46,7 +46,9 @@
     <Compile Include="Symmetric.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DES-SubKey-Generation.csv" />
+    <None Include="Resources\DES-SubKey-Generation.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\prime-numbers.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
