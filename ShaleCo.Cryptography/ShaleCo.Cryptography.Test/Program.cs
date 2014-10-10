@@ -10,16 +10,10 @@ namespace ShaleCo.Cryptography.Test
     {
         static void Main(string[] args)
         {
-            var message = "This is a sample message".GetHash(HashTypes.DEFAULT);
+            var message = "Hello world.";
+            var key = new byte[] { 0x02, 0x12, 0x54, 0x23, 0x02, 0x12, 0x54, 0x23 };
 
-            var keys = Asymmetric.GenerateRSAKeys();
-
-            var encrypted = Asymmetric.RSA(keys.Private, message);
-            var recovered = Asymmetric.RSA(keys.Public, encrypted);
-
-
-            Console.ReadKey();
-
+            Symmetric.EncryptAES(key, message);
         }
     }
 }

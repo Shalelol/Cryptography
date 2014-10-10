@@ -10,11 +10,27 @@ namespace ShaleCo.Cryptography
 {
     public static class Symmetric
     {
-        public static byte[] EncryptAES(byte[] key, byte[] message)
-        {
-            message = Padding(message);
+        private static List<int> _subKeyGenTable = new List<int>();
 
-            var blocks = BreakIntoBlocks(message, 128);
+        static Symmetric()
+        {
+            var lines = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Resources/DES-SubKey-Generation.csv");
+            foreach (var line in lines)
+            {
+                var numbers = line.Split(',');
+
+                foreach (var number in numbers)
+                {
+                    _subKeyGenTable.Add(Int32.Parse(number));
+                }
+            }
+        }
+
+        public static byte[] EncryptAES(byte[] key, string message)
+        {
+            var paddedMessage = Padding(message.GetBytes());
+
+            var blocks = BreakIntoBlocks(paddedMessage, 64);
 
             foreach(var block in blocks)
             {
@@ -27,24 +43,35 @@ namespace ShaleCo.Cryptography
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Padding is done usng PKSC7 padding.
+        /// </summary>
         public static byte[] Padding(byte[] message)
         {
             var remainder = message.Length % 16;
-            var padding = new byte[remainder];
+            var padding = BitConverter.GetBytes(remainder)[0];
+            var paddingList = new List<byte>();
+
+            for(var i = 0; i < remainder; i++)
+            {
+                paddingList.Add(padding);
+            }
 
             byte[] paddedBytes;
+            var paddingArray = paddingList.ToArray();
 
 
             using (MemoryStream stream = new MemoryStream())
             {
                 stream.Write(message, 0, message.Length);
-                stream.Write(padding, 0, padding.Length);
+                stream.Write(paddingArray, 0, paddingArray.Length);
 
                 paddedBytes = stream.ToArray();
             }
 
             return paddedBytes;
         }
+
 
         public static List<byte[]> BreakIntoBlocks(byte[] message, int blockSize)
         {
