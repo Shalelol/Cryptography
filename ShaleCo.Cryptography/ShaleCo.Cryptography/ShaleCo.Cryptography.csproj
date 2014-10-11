@@ -42,11 +42,25 @@
   <ItemGroup>
     <Compile Include="Asymmetric.cs" />
     <Compile Include="Hash.cs" />
+    <Compile Include="Models\RSAKeys.cs" />
+    <Compile Include="Models\SBoxes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Symmetric.cs" />
     <Compile Include="Utils\Helper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\DES-Encryption-EBit-Table.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DES-Encryption-IP.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DES-Encryption-IPInverse.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DES-Encryption-SBoxes.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\DES-SubKey-Generation-leftshift.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

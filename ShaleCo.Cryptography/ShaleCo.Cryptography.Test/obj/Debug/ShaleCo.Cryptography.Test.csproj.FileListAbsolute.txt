@@ -19,3 +19,7 @@ C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\obj\Debu
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-pc1.csv
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-leftshift.csv
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-pc2.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-Encryption-EBit-Table.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-Encryption-IP.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-Encryption-SBoxes.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-Encryption-IPInverse.csv

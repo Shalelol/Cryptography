@@ -52,5 +52,81 @@ namespace ShaleCo.Cryptography.Utils
 
             return newBitArray;
         }
+
+        public static int Base2(bool b0, bool b1)
+        {
+            if(b0)
+            {
+                if(b1)
+                {
+                    return 3;
+                }
+                else
+                {
+                    return 2;
+                }
+            }
+            else
+            {
+                if(b1)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        public static int Base4(bool b0, bool b1, bool b2, bool b3)
+        {
+            if (b0)
+                if (b1)
+                    if (b2)
+                        if (b3)
+                            return 15;
+                        else
+                            return 14;
+                    else
+                        if (b3)
+                            return 13;
+                        else
+                            return 12;
+                else
+                    if (b2)
+                        if (b3)
+                            return 11;
+                        else
+                            return 10;
+                    else
+                        if (b3)
+                            return 9;
+                        else
+                            return 8;
+            else
+                if (b1)
+                    if (b2)
+                        if (b3)
+                            return 7;
+                        else
+                            return 6;
+                    else
+                        if (b3)
+                            return 5;
+                        else
+                            return 4;
+                else
+                    if (b2)
+                        if (b3)
+                            return 3;
+                        else
+                            return 2;
+                    else
+                        if (b3)
+                            return 1;
+                        else
+                            return 0;
+        }
     }
 }
