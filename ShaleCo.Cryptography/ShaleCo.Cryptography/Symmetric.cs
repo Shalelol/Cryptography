@@ -5,25 +5,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ShaleCo.Cryptography.Utils;
 
 namespace ShaleCo.Cryptography
 {
     public static class Symmetric
     {
-        private static List<int> _subKeyGenTable = new List<int>();
+        private static List<int> _subKeyGenPC1;
+        private static List<int> _subKeyGenPC2;
+        private static List<int> _subKeyGenLeftShift;
 
         static Symmetric()
         {
-            var lines = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Resources/DES-SubKey-Generation.csv");
-            foreach (var line in lines)
-            {
-                var numbers = line.Split(',');
-
-                foreach (var number in numbers)
-                {
-                    _subKeyGenTable.Add(Int32.Parse(number));
-                }
-            }
+            _subKeyGenPC1 = Helper.LoadFile<int>("/Resources/DES-SubKey-Generation-pc1.csv");
+            _subKeyGenPC2 = Helper.LoadFile<int>("/Resources/DES-SubKey-Generation-pc2.csv");
+            _subKeyGenLeftShift = Helper.LoadFile<int>("/Resources/DES-SubKey-Generation-leftshift.csv");
         }
 
         public static byte[] EncryptAES(byte[] key, string message)
@@ -31,6 +27,7 @@ namespace ShaleCo.Cryptography
             var paddedMessage = Padding(message.GetBytes());
 
             var blocks = BreakIntoBlocks(paddedMessage, 64);
+            var keys = GenerateSubKeys(key);
 
             foreach(var block in blocks)
             {
@@ -46,7 +43,7 @@ namespace ShaleCo.Cryptography
         /// <summary>
         /// Padding is done usng PKSC7 padding.
         /// </summary>
-        public static byte[] Padding(byte[] message)
+        private static byte[] Padding(byte[] message)
         {
             var remainder = message.Length % 16;
             var padding = BitConverter.GetBytes(remainder)[0];
@@ -71,9 +68,63 @@ namespace ShaleCo.Cryptography
 
             return paddedBytes;
         }
+        private static List<BitArray> GenerateSubKeys(byte[] key)
+        {
+            var k = new BitArray(key);
+            var k1 = new BitArray(56);
+            //Create K1 using PC-1 to re-arrange the key's bits
+            for (var i = 0; i < 56; i++)
+            {
+                k1[i] = k[_subKeyGenPC1[i] - 1];
+            }
 
+            var c = new List<BitArray>();
+            var d = new List<BitArray>();
+            var kList = new List<BitArray>();
+            var cd = new List<BitArray>();
 
-        public static List<byte[]> BreakIntoBlocks(byte[] message, int blockSize)
+            for (var i = 0; i < 17; i++)
+            {
+                c.Add(new BitArray(28));
+                d.Add(new BitArray(28));
+                cd.Add(new BitArray(56));
+                kList.Add(new BitArray(48));
+            }
+
+            //Split K1 into two sub keys C and D
+            for (var i = 0; i < 28; i++)
+            {
+                c[0][i] = k1[i];
+                d[0][i] = k1[i + 28];
+            }
+
+            //Form series of C and D keys by left shifting
+            for (var i = 1; i < 17; i++)
+            {
+                c[i] = c[i - 1].LeftShift(_subKeyGenLeftShift[i-1]);
+                d[i] = d[i - 1].LeftShift(_subKeyGenLeftShift[i-1]);
+
+                for(var j = 0; j < 28; j++)
+                {
+                    cd[i][j] = c[i][j];
+                    cd[i][j + 28] = d[i][j];
+                }
+            }
+
+            //Create set of Keys using PC-2 to re-arrange the key's bits from CD
+            for (var i = 1; i < 17; i++)
+            {
+                for(var j = 0; j < 48; j++)
+                {
+                    kList[i][j] = cd[i][_subKeyGenPC2[j] - 1];
+                }
+            }
+
+            kList.RemoveAt(0);
+
+            return kList;
+        }
+        private static List<byte[]> BreakIntoBlocks(byte[] message, int blockSize)
         {
             if(blockSize % 8 != 0)
             {

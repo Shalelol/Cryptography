@@ -44,9 +44,16 @@
     <Compile Include="Hash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Symmetric.cs" />
+    <Compile Include="Utils\Helper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DES-SubKey-Generation.csv">
+    <None Include="Resources\DES-SubKey-Generation-leftshift.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DES-SubKey-Generation-pc1.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DES-SubKey-Generation-pc2.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Resources\prime-numbers.csv">

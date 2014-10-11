@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using ShaleCo.Cryptography.Utils;
 
 namespace ShaleCo.Cryptography
 {
@@ -66,11 +67,6 @@ namespace ShaleCo.Cryptography
             throw new NotImplementedException();
         }
 
-        public static byte[] GetBytes(this string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
+        
     }
 }

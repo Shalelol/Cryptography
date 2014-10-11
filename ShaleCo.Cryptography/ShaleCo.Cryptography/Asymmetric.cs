@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShaleCo.Cryptography.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,21 +11,12 @@ namespace ShaleCo.Cryptography
 {
     public static class Asymmetric
     {
-        private static List<int> _primeNumbers = new List<int>();
+        private static List<int> _primeNumbers;
         private static Random _randomGenerator = new Random();
 
         static Asymmetric()
         {
-            var lines = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Resources/prime-numbers.csv");
-            foreach(var line in lines)
-            {
-                var numbers = line.Split(',');
-
-                foreach(var number in numbers)
-                {
-                    _primeNumbers.Add(Int32.Parse(number));
-                }
-            }
+            _primeNumbers = Helper.LoadFile<int>("/Resources/prime-numbers.csv");
         }
 
         public static byte[] RSA(byte[] e, byte[] n, byte[] m)

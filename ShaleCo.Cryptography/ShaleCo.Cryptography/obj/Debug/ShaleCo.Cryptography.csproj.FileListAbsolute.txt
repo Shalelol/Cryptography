@@ -4,3 +4,12 @@ C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\ShaleCo.Cryptogr
 C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.dll
 C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.pdb
 C:\Projects\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\prime-numbers.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\prime-numbers.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\ShaleCo.Cryptography.dll
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\ShaleCo.Cryptography.pdb
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.csprojResolveAssemblyReference.cache
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.dll
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\obj\Debug\ShaleCo.Cryptography.pdb
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\DES-SubKey-Generation-pc1.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\DES-SubKey-Generation-leftshift.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography\bin\Debug\Resources\DES-SubKey-Generation-pc2.csv

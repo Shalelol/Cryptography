@@ -16,3 +16,6 @@ C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debu
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\ShaleCo.Cryptography.dll
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\ShaleCo.Cryptography.pdb
 C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\obj\Debug\ShaleCo.Cryptography.Test.csprojResolveAssemblyReference.cache
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-pc1.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-leftshift.csv
+C:\Projects\Cryptography\ShaleCo.Cryptography\ShaleCo.Cryptography.Test\bin\Debug\Resources\DES-SubKey-Generation-pc2.csv
