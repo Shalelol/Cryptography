@@ -11,11 +11,23 @@ namespace ShaleCo.Cryptography.Test
     {
         static void Main(string[] args)
         {
-            var message = "Hello world.";
-            var key = new byte[] { 0xf1, 0xdf, 0xbc, 0x9b, 0x79, 0x57, 0x34, 0x13 };
+            var message = "#Eg����";
+            var key = BytesFromString("1100100000101100111010101001111011011001001111011111101110001111");
 
             var encrypted = Symmetric.EncryptDES(key, message);
             var decrypted = Symmetric.DecryptDES(key, encrypted);
+        }
+
+        static byte[] BytesFromString(string input)
+        {
+            var numBytes = input.Length / 8;
+            byte[] bytes = new byte[numBytes];
+            for(var i = 0; i < numBytes; i++)
+            {
+                bytes[i] = Convert.ToByte(input.Substring(8 * i, 8), 2);
+            }
+
+            return bytes;
         }
     }
 }

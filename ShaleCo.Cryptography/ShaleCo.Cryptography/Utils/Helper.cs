@@ -27,15 +27,11 @@ namespace ShaleCo.Cryptography.Utils
             foreach (var line in lines)
             {
                 var items = line.Split(',');
-
                 foreach(var item in items)
                 {
                     list.Add((T)Convert.ChangeType(item, typeof(T)));
                 }
             }
-
-            list.Reverse();
-
             return list;
         }
 
@@ -148,7 +144,7 @@ namespace ShaleCo.Cryptography.Utils
                             return 0;
         }
 
-        public static void Out(this BitArray bitArray, string name = null, int grouping = 8)
+        public static void Log(this BitArray bitArray, string name = null, int grouping = 8)
         {
             Console.Write("{0} :", name);
 
@@ -156,7 +152,7 @@ namespace ShaleCo.Cryptography.Utils
             foreach(bool bit in bitArray)
             {
                 Console.Write(bit ? 1 : 0);
-                if(count % grouping == 0)
+                if (count % grouping == 0)
                 {
                     Console.Write(" ");
                 }

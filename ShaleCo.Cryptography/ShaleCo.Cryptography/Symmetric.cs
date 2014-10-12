@@ -61,6 +61,7 @@ namespace ShaleCo.Cryptography
         {
             foreach(var block in blocks)
             {
+                block.Log("M", 4);
                 var initialPermutation = new BitArray(64);
                 var left = new BitArray(32);
                 var right = new BitArray(32);
@@ -187,12 +188,10 @@ namespace ShaleCo.Cryptography
         private static List<BitArray> GenerateSubKeys(byte[] key)
         {
             var k = new BitArray(key);
-            k.Out("Key");
             var k1 = new BitArray(56);
 
             //Create K1 using PC-1 to re-arrange the key's bits
             PBox(k1, k, _subKeyGenPC1);
-            k1.Out("Key1", 7);
 
             var c = new List<BitArray>();
             var d = new List<BitArray>();
@@ -210,6 +209,7 @@ namespace ShaleCo.Cryptography
             //Split K1 into two sub keys C and D
             Split(k1, c[0], d[0]);
 
+            Console.WriteLine();
             //Form series of C and D keys by left shifting
             for (var i = 1; i < 17; i++)
             {
