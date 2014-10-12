@@ -58,6 +58,9 @@
     <None Include="Resources\DES-Encryption-IPInverse.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\DES-Encryption-P.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\DES-Encryption-SBoxes.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

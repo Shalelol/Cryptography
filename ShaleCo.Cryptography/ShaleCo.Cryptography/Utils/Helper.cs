@@ -12,9 +12,12 @@ namespace ShaleCo.Cryptography.Utils
     {
         public static byte[] GetBytes(this string str)
         {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
+            return Encoding.ASCII.GetBytes(str);
+        }
+
+        public static string GetString(this byte[] bytes)
+        {
+            return Encoding.ASCII.GetString(bytes);
         }
 
         public static List<T> LoadFile<T>(string relativeFilePath) where T : IConvertible
@@ -30,6 +33,8 @@ namespace ShaleCo.Cryptography.Utils
                     list.Add((T)Convert.ChangeType(item, typeof(T)));
                 }
             }
+
+            list.Reverse();
 
             return list;
         }
@@ -53,30 +58,44 @@ namespace ShaleCo.Cryptography.Utils
             return newBitArray;
         }
 
+        public static byte[] ToByteArray(this BitArray data)
+        {
+            int numBytes = data.Count / 8;
+
+            byte[] bytes = new byte[numBytes];
+            var byteIndex = 0;
+            var bitIndex = 0;
+
+            for (var i = 0; i < data.Count; i++)
+            {
+                if (data[i])
+                {
+                    bytes[byteIndex] |= (byte)(1 << (7 - bitIndex));
+                }
+
+                bitIndex++;
+                if (bitIndex == 8)
+                {
+                    bitIndex = 0;
+                    byteIndex++;
+                }
+            }
+
+            return bytes;
+        }
+
         public static int Base2(bool b0, bool b1)
         {
             if(b0)
-            {
                 if(b1)
-                {
                     return 3;
-                }
                 else
-                {
                     return 2;
-                }
-            }
             else
-            {
                 if(b1)
-                {
                     return 1;
-                }
                 else
-                {
                     return 0;
-                }
-            }
         }
 
         public static int Base4(bool b0, bool b1, bool b2, bool b3)
@@ -127,6 +146,23 @@ namespace ShaleCo.Cryptography.Utils
                             return 1;
                         else
                             return 0;
+        }
+
+        public static void Out(this BitArray bitArray, string name = null, int grouping = 8)
+        {
+            Console.Write("{0} :", name);
+
+            var count = 1;
+            foreach(bool bit in bitArray)
+            {
+                Console.Write(bit ? 1 : 0);
+                if(count % grouping == 0)
+                {
+                    Console.Write(" ");
+                }
+                count++;
+            }
+            Console.WriteLine();
         }
     }
 }

@@ -12,9 +12,10 @@ namespace ShaleCo.Cryptography.Test
         static void Main(string[] args)
         {
             var message = "Hello world.";
-            var key = new byte[] { 0x02, 0x12, 0x54, 0x23, 0x02, 0x12, 0x54, 0x23 };
+            var key = new byte[] { 0xf1, 0xdf, 0xbc, 0x9b, 0x79, 0x57, 0x34, 0x13 };
 
-            Symmetric.EncryptAES(key, message);
+            var encrypted = Symmetric.EncryptDES(key, message);
+            var decrypted = Symmetric.DecryptDES(key, encrypted);
         }
     }
 }
