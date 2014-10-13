@@ -34,27 +34,28 @@ namespace ShaleCo.Cryptography
             _sBoxes = new SBoxes("/Resources/DES-Encryption-SBoxes.csv");
         }
 
-        public static string EncryptDES(byte[] key, string message)
+        public static byte[] EncryptDES(byte[] key, byte[] message)
         {
-            var paddedMessage = Padding(message.GetBytes());
+            //Chang this back to accepting a string
+            var paddedMessage = Padding(message);
 
             var blocks = BreakIntoBlocks(paddedMessage, 64);
             var keys = GenerateSubKeys(key);
 
-            return DES(keys, blocks).GetString();
+            return DES(keys, blocks);
         }
 
-        public static string DecryptDES(byte[] key, string cipher)
+        public static byte[] DecryptDES(byte[] key, byte[] cipher)
         {
-            var blocks = BreakIntoBlocks(cipher.GetBytes(), 64);
+            var blocks = BreakIntoBlocks(cipher, 64);
             var keys = GenerateSubKeys(key);
             keys.Reverse();
 
             var decrypted = DES(keys, blocks);
 
-            //decrypted = ReversePadding(decrypted);
+            decrypted = ReversePadding(decrypted);
 
-            return decrypted.GetString();
+            return decrypted;
         }
 
         public static byte[] DES(List<BitArray> keys, List<BitArray> blocks)
@@ -68,6 +69,8 @@ namespace ShaleCo.Cryptography
 
                 //Rearange bits according to IP (Initial permutation)
                 PBox(initialPermutation, block, _encryptionIP);
+
+                initialPermutation.Log("IP", 4);
 
                 //Split bits into left and right 32 bit halves
                 Split(initialPermutation, left, right);
@@ -90,10 +93,18 @@ namespace ShaleCo.Cryptography
                     //Substitute expanded 48 block with 8 SBoxes to get back to 32 bits
                     SBox(substituted, expanded);
 
-                    //Put the substituted values back into right using a Permutation Box
-                    PBox(right, new BitArray(substituted.ToArray()), _encryptionP);
+                    var subBitArray = new BitArray(substituted.ToArray());
 
+                    subBitArray.Log("SBox:", 4);
+
+                    //Put the substituted values back into right using a Permutation Box
+                    PBox(right, subBitArray, _encryptionP);
+                    right = right.Xor(oldLeft);
+                    
                     left = oldRight;
+
+                    right.Log("R" + i, 4);
+                    left.Log("L" + i, 4);
                 }
 
                 //Swap left and right
@@ -103,8 +114,12 @@ namespace ShaleCo.Cryptography
                     initialPermutation[i + 32] = left[i];
                 }
 
+                initialPermutation.Log("R16L16", 8);
+
                 //Apply final Permutation;
                 PBox(block, initialPermutation, _encryptionIPInverse);
+
+                block.Log("IP-1", 8);
             }
 
             return CombineBlocks(blocks);
@@ -157,7 +172,16 @@ namespace ShaleCo.Cryptography
         /// </summary>
         private static byte[] Padding(byte[] message)
         {
-            var remainder = message.Length % 16;
+            int remainder;
+            if(message.Length > 8)
+            {
+                remainder = message.Length % 8;
+            }
+            else
+            {
+                remainder = 8 - message.Length;
+            }
+
             var padding = BitConverter.GetBytes(remainder)[0];
             var paddingList = new List<byte>();
 
@@ -182,8 +206,24 @@ namespace ShaleCo.Cryptography
         }
         private static byte[] ReversePadding(byte[] bytes)
         {
+            int paddingNumber = bytes[bytes.Length - 1];
 
-            throw new NotImplementedException();
+            if(paddingNumber > 7)
+            {
+                return bytes;
+            }
+
+            for(var i = 1; i <= paddingNumber; i++)
+            {
+                if(bytes[bytes.Length - i] != paddingNumber)
+                {
+                    return bytes;
+                }
+            }
+
+            var newArray = bytes.Take(bytes.Length - paddingNumber).ToArray();
+
+            return newArray;
         }
         private static List<BitArray> GenerateSubKeys(byte[] key)
         {

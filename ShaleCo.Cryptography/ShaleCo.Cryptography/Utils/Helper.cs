@@ -56,27 +56,8 @@ namespace ShaleCo.Cryptography.Utils
 
         public static byte[] ToByteArray(this BitArray data)
         {
-            int numBytes = data.Count / 8;
-
-            byte[] bytes = new byte[numBytes];
-            var byteIndex = 0;
-            var bitIndex = 0;
-
-            for (var i = 0; i < data.Count; i++)
-            {
-                if (data[i])
-                {
-                    bytes[byteIndex] |= (byte)(1 << (7 - bitIndex));
-                }
-
-                bitIndex++;
-                if (bitIndex == 8)
-                {
-                    bitIndex = 0;
-                    byteIndex++;
-                }
-            }
-
+            byte[] bytes = new byte[data.Length / 8];
+            data.CopyTo(bytes, 0);
             return bytes;
         }
 
