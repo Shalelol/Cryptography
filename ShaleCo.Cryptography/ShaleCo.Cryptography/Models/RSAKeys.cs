@@ -20,7 +20,7 @@ namespace ShaleCo.Cryptography
 
         public override string ToString()
         {
-            return string.Format("Private: {0} Public: {1}", this.Private, this.Public);
+            return string.Format("Private: {0} \r\n Public: {1} ", this.Private, this.Public);
         }
     }
 
@@ -40,7 +40,7 @@ namespace ShaleCo.Cryptography
             var unique = new BigInteger(this.Unique);
             var common = new BigInteger(this.Common);
 
-            return string.Format("{0}, {1}", unique, common);
+            return string.Format("\t{0}, \t{1}", unique, common);
         }
     }
 }

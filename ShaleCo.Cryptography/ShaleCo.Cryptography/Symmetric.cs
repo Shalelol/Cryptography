@@ -34,10 +34,30 @@ namespace ShaleCo.Cryptography
             _sBoxes = new SBoxes("/Resources/DES-Encryption-SBoxes.csv");
         }
 
+        public static byte[] Encrypt3DES(byte[] key, byte[] message)
+        {
+            var keys = SplitKey(key);
+            var cipher0 = EncryptDES(keys[0], message);
+            var cipher1 = DecryptDES(keys[1], cipher0);
+            var cipher2 = EncryptDES(keys[2], cipher1);
+
+            return cipher2;
+        }
+
+        public static byte[] Decrypt3DES(byte[] key, byte[] cipher)
+        {
+            var keys = SplitKey(key);
+            var cipher1 = DecryptDES(keys[2], cipher);
+            var cipher0 = EncryptDES(keys[1], cipher1);
+            var message = DecryptDES(keys[0], cipher0);
+
+            return message;
+        }
+
         public static byte[] EncryptDES(byte[] key, byte[] message)
         {
             //Chang this back to accepting a string
-            var paddedMessage = Padding(message);
+            var paddedMessage = Helper.Padding(message, 8);
 
             var blocks = BreakIntoBlocks(paddedMessage, 64);
             var keys = GenerateSubKeys(key);
@@ -62,15 +82,12 @@ namespace ShaleCo.Cryptography
         {
             foreach(var block in blocks)
             {
-                block.Log("M", 4);
                 var initialPermutation = new BitArray(64);
                 var left = new BitArray(32);
                 var right = new BitArray(32);
 
                 //Rearange bits according to IP (Initial permutation)
                 PBox(initialPermutation, block, _encryptionIP);
-
-                initialPermutation.Log("IP", 4);
 
                 //Split bits into left and right 32 bit halves
                 Split(initialPermutation, left, right);
@@ -95,16 +112,11 @@ namespace ShaleCo.Cryptography
 
                     var subBitArray = new BitArray(substituted.ToArray());
 
-                    subBitArray.Log("SBox:", 4);
-
                     //Put the substituted values back into right using a Permutation Box
                     PBox(right, subBitArray, _encryptionP);
                     right = right.Xor(oldLeft);
                     
                     left = oldRight;
-
-                    right.Log("R" + i, 4);
-                    left.Log("L" + i, 4);
                 }
 
                 //Swap left and right
@@ -114,17 +126,26 @@ namespace ShaleCo.Cryptography
                     initialPermutation[i + 32] = left[i];
                 }
 
-                initialPermutation.Log("R16L16", 8);
-
                 //Apply final Permutation;
                 PBox(block, initialPermutation, _encryptionIPInverse);
-
-                block.Log("IP-1", 8);
             }
 
             return CombineBlocks(blocks);
         }
 
+        private static List<byte[]> SplitKey(byte[] keys)
+        {
+            var splitKeys = new List<byte[]>();
+
+            for(var i = 0; i < 3; i++)
+            {
+                var index = i * 8;
+                var key = keys.Skip(index).Take(8).ToArray();
+                splitKeys.Add(key);
+            }
+
+            return splitKeys;
+        }
         private static void SBox(List<bool> target, BitArray source)
         {
             for (var j = 0; j < 8; j++)
@@ -170,41 +191,8 @@ namespace ShaleCo.Cryptography
         /// <summary>
         /// Padding is done usng PKSC7 padding.
         /// </summary>
-        private static byte[] Padding(byte[] message)
-        {
-            int remainder;
-            if(message.Length > 8)
-            {
-                remainder = message.Length % 8;
-            }
-            else
-            {
-                remainder = 8 - message.Length;
-            }
-
-            var padding = BitConverter.GetBytes(remainder)[0];
-            var paddingList = new List<byte>();
-
-            for(var i = 0; i < remainder; i++)
-            {
-                paddingList.Add(padding);
-            }
-
-            byte[] paddedBytes;
-            var paddingArray = paddingList.ToArray();
-
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                stream.Write(message, 0, message.Length);
-                stream.Write(paddingArray, 0, paddingArray.Length);
-
-                paddedBytes = stream.ToArray();
-            }
-
-            return paddedBytes;
-        }
-        private static byte[] ReversePadding(byte[] bytes)
+        
+        public static byte[] ReversePadding(byte[] bytes)
         {
             int paddingNumber = bytes[bytes.Length - 1];
 

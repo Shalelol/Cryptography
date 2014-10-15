@@ -11,29 +11,79 @@ namespace ShaleCo.Cryptography
 {
     public static class Asymmetric
     {
-        private static List<int> _primeNumbers;
+        private static List<Int64> _primeNumbers;
         private static Random _randomGenerator = new Random();
 
         static Asymmetric()
         {
-            _primeNumbers = Helper.LoadFile<int>("/Resources/prime-numbers.csv");
+            _primeNumbers = Helper.LoadFile<Int64>("/Resources/prime-numbers.csv");
         }
 
         public static byte[] RSA(byte[] e, byte[] n, byte[] m)
         {
             var key1 = new BigInteger(e);
             var key2 = new BigInteger(n);
-            var message = new BigInteger(m);
+            var cipherText = new List<BigInteger>();
 
-            //equivilant of m ^ e % n (if e, n and m were 32bit integers) 
-            var cipher = BigInteger.ModPow(message, key1, key2);
+            var paddedMessage = Helper.Padding(m, 4);
+            var blocks = BreakIntoBlocks(paddedMessage, 32);
+            
+            foreach(var block in blocks)
+            {
+                //equivilant of m ^ e % n (if e, n and m were 32bit integers) 
+                cipherText.Add(BigInteger.ModPow(block, key1, key2));
+            }
+            
+            return Combineblocks(cipherText, 5);
+        }
 
-            return cipher.ToByteArray();
+        public static byte[] EncryptRSA(byte[] e, byte[] n, byte[] m)
+        {
+            var key1 = new BigInteger(e);
+            var key2 = new BigInteger(n);
+            var cipherText = new List<BigInteger>();
+
+            var paddedMessage = Helper.Padding(m, 4);
+            var blocks = BreakIntoBlocks(paddedMessage, 4, true);
+
+            foreach(var block in blocks)
+            {
+                cipherText.Add(BigInteger.ModPow(block, key1, key2));
+            }
+
+            return Combineblocks(cipherText, 5);
+        }
+
+        public static byte[] DecryptRSA(byte[] e, byte[] n, byte[] c)
+        {
+            var key1 = new BigInteger(e);
+            var key2 = new BigInteger(n);
+            var message = new List<BigInteger>();
+
+            var blocks = BreakIntoBlocks(c, 5);
+
+            foreach(var block in blocks)
+            {
+                message.Add(BigInteger.ModPow(block, key1, key2));
+            }
+
+            var combinedBlocks = Combineblocks(message, 4);
+
+            return Helper.ReversePadding(combinedBlocks);
         }
 
         public static byte[] RSA(RSAKey key, byte[] m)
         {
             return RSA(key.Unique, key.Common, m);
+        }
+
+        public static byte[] EncryptRSA(RSAKey key, byte[] m)
+        {
+            return EncryptRSA(key.Unique, key.Common, m);
+        }
+        public static byte[] DecryptRSA(RSAKey key, byte[] m)
+        {
+            return DecryptRSA(key.Unique, key.Common, m);
         }
 
         public static RSAKeys GenerateRSAKeys()
@@ -64,10 +114,44 @@ namespace ShaleCo.Cryptography
             //Get the modular multiplicative inverse
             var d = ModInverse(e, toilent);
 
-            //This is a proof that e and d are correct
-            //var test = (e * d) % toilent == 1 % toilent; 
-
             return new RSAKeys(d.ToByteArray(), e.ToByteArray(), n.ToByteArray());
+        }
+
+        private static List<BigInteger> BreakIntoBlocks(byte[] message, int blockBitSize, bool addRoom = false)
+        {
+            var blockByteSize = blockBitSize;
+            var blocks = new List<BigInteger>();
+
+            for (var i = 0; i < message.Length; i += blockByteSize)
+            {
+                var block = addRoom ? new byte[blockByteSize + 1] : new byte[blockByteSize];
+                Array.Copy(message, i, block, 0, blockByteSize);
+                blocks.Add(new BigInteger(block));
+            }
+
+            return blocks;
+        }
+
+        private static byte[] Combineblocks(List<BigInteger> messages, int blockSize)
+        {
+            var blocks = new List<byte[]>();
+
+            for (var i = messages.Count - 1; i >= 0; i-- )
+            {
+                blocks.Add(messages[i].ToByteArray());
+            }
+
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                while( blocks[i].Length != blockSize)
+                {
+                    var newBlock = new byte[blocks[i].Length + 1];
+                    Buffer.BlockCopy(blocks[i], 0, newBlock, 0, blocks[i].Length);
+                    blocks[i] = newBlock;
+                }
+            }
+
+            return blocks.SelectMany(e => e).ToArray();
         }
 
         private static BigInteger ModInverse(BigInteger a, BigInteger b)
@@ -121,7 +205,7 @@ namespace ShaleCo.Cryptography
 
         private static BigInteger RandomPrime()
         {
-            return new BigInteger(_primeNumbers.ElementAt(_randomGenerator.Next(0, 9999)));
+            return new BigInteger(_primeNumbers.ElementAt(_randomGenerator.Next(0, _primeNumbers.Count - 1)));
         }
 
     }

@@ -141,5 +141,63 @@ namespace ShaleCo.Cryptography.Utils
             }
             Console.WriteLine();
         }
+
+        public static byte[] Padding(byte[] message, int blockSize)
+        {
+            int remainder;
+            if (message.Length > blockSize)
+            {
+                remainder = message.Length % blockSize;
+                remainder = blockSize - remainder;
+            }
+            else
+            {
+                remainder = blockSize - message.Length;
+            }
+
+            var padding = BitConverter.GetBytes(remainder)[0];
+            var paddingList = new List<byte>();
+
+            for (var i = 0; i < remainder; i++)
+            {
+                paddingList.Add(padding);
+            }
+
+            byte[] paddedBytes;
+            var paddingArray = paddingList.ToArray();
+
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                stream.Write(message, 0, message.Length);
+                stream.Write(paddingArray, 0, paddingArray.Length);
+
+                paddedBytes = stream.ToArray();
+            }
+
+            return paddedBytes;
+        }
+
+        public static byte[] ReversePadding(byte[] bytes)
+        {
+            int paddingNumber = bytes[bytes.Length - 1];
+
+            if (paddingNumber > 7)
+            {
+                return bytes;
+            }
+
+            for (var i = 1; i <= paddingNumber; i++)
+            {
+                if (bytes[bytes.Length - i] != paddingNumber)
+                {
+                    return bytes;
+                }
+            }
+
+            var newArray = bytes.Take(bytes.Length - paddingNumber).ToArray();
+
+            return newArray;
+        }
     }
 }
