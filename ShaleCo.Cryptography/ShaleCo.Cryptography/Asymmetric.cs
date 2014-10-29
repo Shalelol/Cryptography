@@ -145,9 +145,18 @@ namespace ShaleCo.Cryptography
             {
                 while( blocks[i].Length != blockSize)
                 {
-                    var newBlock = new byte[blocks[i].Length + 1];
-                    Buffer.BlockCopy(blocks[i], 0, newBlock, 0, blocks[i].Length);
-                    blocks[i] = newBlock;
+                    if (blocks[i].Length > blockSize)
+                    {
+                        var trimmed = new byte[blocks[i].Length - 1];
+                        Buffer.BlockCopy(blocks[i], 0, trimmed, 0, blocks[i].Length - 1);
+                        blocks[i] = trimmed;
+                    }
+                    else
+                    {
+                        var newBlock = new byte[blocks[i].Length + 1];
+                        Buffer.BlockCopy(blocks[i], 0, newBlock, 0, blocks[i].Length);
+                        blocks[i] = newBlock;
+                    }
                 }
             }
 

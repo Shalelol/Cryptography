@@ -12,77 +12,81 @@ namespace ShaleCo.Cryptography.Test
     {
         static void Main(string[] args)
         {
-            for (; ; )
-            {
-                var message = "This is a long test message which is being used to prove there are no errors.".GetBytes();
-                var keys = Asymmetric.GenerateRSAKeys();
-
-                var encrypted = Asymmetric.EncryptRSA(keys.Private, message);
-                var recovered = Asymmetric.DecryptRSA(keys.Public, encrypted);
-
-                Console.WriteLine(recovered.GetString());
-                
-                Console.ReadKey();
-            }
-
-            ////var message = BytesFromString("0000000100100011010001010110011110001001101010111100110111101111");
-            ////var message = BytesFromString("1000000011000100101000101110011010010001110101011011001111110111");
-            //var message = "A";
-            //var hash = message.GetHash();
-                        
-            //var aliceRSAKey = Asymmetric.GenerateRSAKeys();
-            //var bobRSAKey = Asymmetric.GenerateRSAKeys();
-
-            //var signature = Asymmetric.RSA(aliceRSAKey.Private, hash);
-            
-
-            ////var message = "A";
-            //var DES3key = BytesFromString("000100110011010001010111011110011001101110111100110111111111000100010011001101000101011101111001100110111011110011011111111100010001001100110100010101110111100110011011101111001101111111110001");
-            ////var key1 = BytesFromString("0001001100110100010101110111100110011011101111001101111111110001");
-
-            //var encrypted = Symmetric.Encrypt3DES(DES3key, message.GetBytes());
-
-            //var DES3KeyEncrypted = Asymmetric.RSA(bobRSAKey.Public, DES3key);
-
-            //var combinedMessage = CombineMessage(DES3KeyEncrypted, encrypted, signature);
-
-            ///** 
-            // * 
-            // * Simulate sending
-            // * 
-            // * **/
-
-            //var recoveredKey = new byte[24];
-            //var recoveredSignature = new byte[4];
-            //var recoveredCiphertext = new byte[combinedMessage.Length - recoveredKey.Length - recoveredSignature.Length];
-            //SplitMessage(recoveredKey, recoveredCiphertext, recoveredSignature, combinedMessage);
-
-            //var DES3Decrypted = Asymmetric.RSA(bobRSAKey.Private, recoveredKey);
-
-            //var decrypted = Symmetric.Decrypt3DES(DES3Decrypted, recoveredCiphertext).GetString();
-            //var recoveredHash = Asymmetric.RSA(aliceRSAKey.Public, recoveredSignature);
-            //var decryptedHash = decrypted.GetHash();
-
-            //if (recoveredHash != decryptedHash)
+            //for (; ; )
             //{
-            //    throw new Exception("Message was either not from alice or it was altered");
+            //     var message1 = "aaaaaaaaaaaaaaaaaaaaaaaa".GetBytes();
+            //    var DES3key1 = BytesFromString("000100110011010001010111011110011001101110111100110111111111000110011010100100110010100100101010010101010010101010101010100100101001001010100100101010100101010100101010010101010010100100100010");
+            //    var keys = Asymmetric.GenerateRSAKeys();
+
+            //    var encrypted1 = Asymmetric.EncryptRSA(keys.Public, message1);
+            //    var recovered = Asymmetric.DecryptRSA(keys.Private, encrypted1);
+
+            //    Console.WriteLine(recovered.GetString());
+
+            //    Console.ReadKey();
             //}
+
+            //var message = BytesFromString("0000000100100011010001010110011110001001101010111100110111101111");
+            //var message = BytesFromString("1000000011000100101000101110011010010001110101011011001111110111");
+            var message = "Hello";
+            var hash = message.GetHash();
+
+            var aliceRSAKey = Asymmetric.GenerateRSAKeys();
+            var bobRSAKey = Asymmetric.GenerateRSAKeys();
+
+            var signature = Asymmetric.EncryptRSA(aliceRSAKey.Private, hash);
+
+
+            //var message = "A";
+            var DES3key = BytesFromString("000100110011010001010111011110011001101110111100110111111111000110011010100100110010100100101010010101010010101010101010100100101001001010100100101010100101010100101010010101010010100100100010");
+            //var key1 = BytesFromString("");
+
+
+
+            var encrypted = Symmetric.Encrypt3DES(DES3key, message.GetBytes());
+
+            var DES3KeyEncrypted = Asymmetric.EncryptRSA(bobRSAKey.Public, DES3key);
+
+            var combinedMessage = CombineMessage(DES3KeyEncrypted, encrypted, signature);
+
+            /** 
+             * 
+             * Simulate sending
+             * 
+             * **/
+
+            var recoveredKey = new byte[35];
+            var recoveredSignature = new byte[5];
+            var recoveredCiphertext = new byte[combinedMessage.Length - recoveredKey.Length - recoveredSignature.Length];
+            SplitMessage(ref recoveredKey, ref recoveredCiphertext, ref recoveredSignature, ref combinedMessage);
+
+            var DES3Decrypted = Asymmetric.DecryptRSA(bobRSAKey.Private, recoveredKey);
+
+            var decrypted = Symmetric.Decrypt3DES(DES3Decrypted, recoveredCiphertext).GetString();
+            var recoveredHash = Asymmetric.DecryptRSA(aliceRSAKey.Public, recoveredSignature);
+            var decryptedHash = decrypted.GetHash();
+
+            //This doesnt work, fix this.
+            if (recoveredHash != decryptedHash)
+            {
+                throw new Exception("Message was either not from alice or it was altered");
+            }
         }
 
         static byte[] CombineMessage(byte[] symmetricKey, byte[] ciphertext, byte[] signature)
         {
             var block = new byte[symmetricKey.Length + ciphertext.Length + signature.Length];
             Buffer.BlockCopy(symmetricKey, 0, block, 0, symmetricKey.Length);
-            Buffer.BlockCopy(ciphertext, 0, block, symmetricKey.Length, symmetricKey.Length);
-            Buffer.BlockCopy(signature, 0, block, symmetricKey.Length + signature.Length, signature.Length);
+            Buffer.BlockCopy(ciphertext, 0, block, symmetricKey.Length, ciphertext.Length);
+            Buffer.BlockCopy(signature, 0, block, symmetricKey.Length + ciphertext.Length, signature.Length);
 
             return block;
         }
 
-        static void SplitMessage(byte[] symmetricKey, byte[] ciphertext, byte[] signature, byte[] message)
+        static void SplitMessage(ref byte[] symmetricKey, ref byte[] ciphertext, ref byte[] signature, ref byte[] message)
         {
-            symmetricKey = new byte[24];
-            signature = new byte[4];
+            symmetricKey = new byte[35];
+            signature = new byte[5];
             ciphertext = new byte[message.Length - symmetricKey.Length - signature.Length];
 
             Buffer.BlockCopy(message, 0, symmetricKey, 0, symmetricKey.Length);
