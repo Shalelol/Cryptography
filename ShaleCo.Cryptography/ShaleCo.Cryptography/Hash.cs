@@ -36,17 +36,7 @@ namespace ShaleCo.Cryptography
         private static byte[] SHALE(string str)
         {
             var bytes = str.GetBytes();
-            var padding = new byte[bytes.Length % 4];
-            byte[] paddedBytes;
-            
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                stream.Write(bytes, 0, bytes.Length);
-                stream.Write(padding, 0, padding.Length);
-
-                paddedBytes = stream.ToArray();
-            }
+            var paddedBytes = Helper.Padding(bytes, 4);
 
             var hash = new byte[4];
             Array.Copy(paddedBytes, 0, hash, 0, 4);

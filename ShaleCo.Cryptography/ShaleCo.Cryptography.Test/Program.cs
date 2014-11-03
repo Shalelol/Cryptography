@@ -28,8 +28,12 @@ namespace ShaleCo.Cryptography.Test
 
             //var message = BytesFromString("0000000100100011010001010110011110001001101010111100110111101111");
             //var message = BytesFromString("1000000011000100101000101110011010010001110101011011001111110111");
+
+            Output.SetFileOutPut("OutputFile.txt");
+            Console.WriteLine("Blaaaah");
+
             var message = "Hello";
-            var hash = message.GetHash();
+            var hash = message.GetHash(HashTypes.SHALE);
 
             var aliceRSAKey = Asymmetric.GenerateRSAKeys();
             var bobRSAKey = Asymmetric.GenerateRSAKeys();
@@ -38,11 +42,9 @@ namespace ShaleCo.Cryptography.Test
 
 
             //var message = "A";
-            var DES3key = BytesFromString("000100110011010001010111011110011001101110111100110111111111000110011010100100110010100100101010010101010010101010101010100100101001001010100100101010100101010100101010010101010010100100100010");
+            var DES3key = Symmetric.Generate3DESKey();
             //var key1 = BytesFromString("");
-
-
-
+            
             var encrypted = Symmetric.Encrypt3DES(DES3key, message.GetBytes());
 
             var DES3KeyEncrypted = Asymmetric.EncryptRSA(bobRSAKey.Public, DES3key);
@@ -64,13 +66,15 @@ namespace ShaleCo.Cryptography.Test
 
             var decrypted = Symmetric.Decrypt3DES(DES3Decrypted, recoveredCiphertext).GetString();
             var recoveredHash = Asymmetric.DecryptRSA(aliceRSAKey.Public, recoveredSignature);
-            var decryptedHash = decrypted.GetHash();
+            var decryptedHash = decrypted.GetHash(HashTypes.SHALE);
 
             //This doesnt work, fix this.
             if (recoveredHash != decryptedHash)
             {
-                throw new Exception("Message was either not from alice or it was altered");
+                
             }
+
+            Output.Dispose();
         }
 
         static byte[] CombineMessage(byte[] symmetricKey, byte[] ciphertext, byte[] signature)

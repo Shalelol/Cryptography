@@ -21,6 +21,8 @@ namespace ShaleCo.Cryptography
 
         private static SBoxes _sBoxes;
 
+        private static Random _randomGenerator = new Random();
+
         static Symmetric()
         {
             _subKeyGenPC1 = Helper.LoadFile<int>("/Resources/DES-SubKey-Generation-pc1.csv");
@@ -76,6 +78,34 @@ namespace ShaleCo.Cryptography
             decrypted = ReversePadding(decrypted);
 
             return decrypted;
+        }
+
+        public static byte[] GenerateDESKey()
+        {
+            var firstHalf = BitConverter.GetBytes(_randomGenerator.Next());
+            var secondHalf = BitConverter.GetBytes(_randomGenerator.Next());
+
+            var key = new byte[firstHalf.Length + secondHalf.Length];
+
+            Buffer.BlockCopy(firstHalf, 0, key, 0, firstHalf.Length);
+            Buffer.BlockCopy(secondHalf, 0, key, firstHalf.Length, secondHalf.Length);
+
+            return key;
+        }
+
+        public static byte[] Generate3DESKey()
+        {
+            var firstThird = GenerateDESKey();
+            var middleThird = GenerateDESKey();
+            var finalThird = GenerateDESKey();
+
+            var key = new byte[firstThird.Length + middleThird.Length + finalThird.Length];
+
+            Buffer.BlockCopy(firstThird, 0, key, 0, firstThird.Length);
+            Buffer.BlockCopy(middleThird, 0, key, firstThird.Length, middleThird.Length);
+            Buffer.BlockCopy(finalThird, 0, key, firstThird.Length + middleThird.Length, finalThird.Length);
+
+            return key;
         }
 
         public static byte[] DES(List<BitArray> keys, List<BitArray> blocks)
