@@ -19,24 +19,6 @@ namespace ShaleCo.Cryptography
             _primeNumbers = Helper.LoadFile<Int64>("/Resources/prime-numbers.csv");
         }
 
-        public static byte[] RSA(byte[] e, byte[] n, byte[] m)
-        {
-            var key1 = new BigInteger(e);
-            var key2 = new BigInteger(n);
-            var cipherText = new List<BigInteger>();
-
-            var paddedMessage = Helper.Padding(m, 4);
-            var blocks = BreakIntoBlocks(paddedMessage, 32);
-            
-            foreach(var block in blocks)
-            {
-                //equivilant of m ^ e % n (if e, n and m were 32bit integers) 
-                cipherText.Add(BigInteger.ModPow(block, key1, key2));
-            }
-            
-            return Combineblocks(cipherText, 5);
-        }
-
         public static byte[] EncryptRSA(byte[] e, byte[] n, byte[] m)
         {
             var key1 = new BigInteger(e);
@@ -70,11 +52,6 @@ namespace ShaleCo.Cryptography
             var combinedBlocks = Combineblocks(message, 4);
 
             return Helper.ReversePadding(combinedBlocks);
-        }
-
-        public static byte[] RSA(RSAKey key, byte[] m)
-        {
-            return RSA(key.Unique, key.Common, m);
         }
 
         public static byte[] EncryptRSA(RSAKey key, byte[] m)
