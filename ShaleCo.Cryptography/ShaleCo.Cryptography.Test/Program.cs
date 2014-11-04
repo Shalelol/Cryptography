@@ -12,70 +12,71 @@ namespace ShaleCo.Cryptography.Test
     {
         static void Main(string[] args)
         {
-            //for (; ; )
-            //{
-            //     var message1 = "aaaaaaaaaaaaaaaaaaaaaaaa".GetBytes();
-            //    var DES3key1 = BytesFromString("000100110011010001010111011110011001101110111100110111111111000110011010100100110010100100101010010101010010101010101010100100101001001010100100101010100101010100101010010101010010100100100010");
-            //    var keys = Asymmetric.GenerateRSAKeys();
+            //Run through basic scenario
+            //-scenario "Message text"
 
-            //    var encrypted1 = Asymmetric.EncryptRSA(keys.Public, message1);
-            //    var recovered = Asymmetric.DecryptRSA(keys.Private, encrypted1);
+            //DES encrypt
+            //-DES "Message" "Key"
 
-            //    Console.WriteLine(recovered.GetString());
+            //-DESDecrypt "Message" "Key"
 
-            //    Console.ReadKey();
-            //}
+            //DES3 encrypt
+            //-DES3 "Message" "Key"
 
-            //var message = BytesFromString("0000000100100011010001010110011110001001101010111100110111101111");
-            //var message = BytesFromString("1000000011000100101000101110011010010001110101011011001111110111");
+            //-DES3Decrypt "Message" "Key"
 
-            Output.SetFileOutPut("OutputFile.txt");
-            Console.WriteLine("Blaaaah");
+            //RSA encrypt/decrypt
+            //-RSA "Message" "Key"
 
-            var message = "Hello";
-            var hash = message.GetHash(HashTypes.SHALE);
+            //Generate RSA key
+            //-RSAKey
 
-            var aliceRSAKey = Asymmetric.GenerateRSAKeys();
-            var bobRSAKey = Asymmetric.GenerateRSAKeys();
+            //Get Hash
+            //-Hash "Message" "HashType"
 
-            var signature = Asymmetric.EncryptRSA(aliceRSAKey.Private, hash);
+            //Options
+            //-FileOutput "filePath"
 
-
-            //var message = "A";
-            var DES3key = Symmetric.Generate3DESKey();
-            //var key1 = BytesFromString("");
-            
-            var encrypted = Symmetric.Encrypt3DES(DES3key, message.GetBytes());
-
-            var DES3KeyEncrypted = Asymmetric.EncryptRSA(bobRSAKey.Public, DES3key);
-
-            var combinedMessage = CombineMessage(DES3KeyEncrypted, encrypted, signature);
-
-            /** 
-             * 
-             * Simulate sending
-             * 
-             * **/
-
-            var recoveredKey = new byte[35];
-            var recoveredSignature = new byte[5];
-            var recoveredCiphertext = new byte[combinedMessage.Length - recoveredKey.Length - recoveredSignature.Length];
-            SplitMessage(ref recoveredKey, ref recoveredCiphertext, ref recoveredSignature, ref combinedMessage);
-
-            var DES3Decrypted = Asymmetric.DecryptRSA(bobRSAKey.Private, recoveredKey);
-
-            var decrypted = Symmetric.Decrypt3DES(DES3Decrypted, recoveredCiphertext).GetString();
-            var recoveredHash = Asymmetric.DecryptRSA(aliceRSAKey.Public, recoveredSignature);
-            var decryptedHash = decrypted.GetHash(HashTypes.SHALE);
-
-            //This doesnt work, fix this.
-            if (recoveredHash != decryptedHash)
+            switch(args[0])
             {
-                
+                case "-scenario":
+                    break;
+                case "-DES":
+                    try
+                    {
+                        if (args[2] != null)
+                        {
+                            var key = BytesFromString(args[2]);
+                        }
+                        else
+                        {
+                            var key = Symmetric
+                        }
+                        var message = args[1].GetBytes();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    break;
+                case "-DESDecrypt":
+                    break;
+                case "-DES3":
+                    break;
+                case "-DES3Decrypt":
+                    break;
+                case "-RSA":
+                    break;
+                case "-RSAKey":
+                    break;
+                case "-hash":
+                    break;
+                default:
+                    break;
             }
-
-            Output.Dispose();
         }
+
+
 
         static byte[] CombineMessage(byte[] symmetricKey, byte[] ciphertext, byte[] signature)
         {
