@@ -12,18 +12,18 @@ namespace ShaleCo.Cryptography.Test
         private static FileStream outStream;
         private static StreamWriter writer;
         private static TextWriter oldOut;
-        public static void SetFileOutPut(string filename)
+        public static void SetFileOutPut(string filePath)
         {
             oldOut = Console.Out;
 
             try
             {
-                outStream = new FileStream(Directory.GetCurrentDirectory() + @"\" + filename, FileMode.OpenOrCreate, FileAccess.Write);
+                outStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
                 writer = new StreamWriter(outStream);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Cannot open {0} for writing.", filename);
+                Console.WriteLine("Cannot open {0} for writing.", filePath);
                 Console.WriteLine("Exception: {0}", e.Message);
                 return;
             }
