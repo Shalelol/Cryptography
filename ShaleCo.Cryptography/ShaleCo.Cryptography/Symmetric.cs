@@ -267,7 +267,6 @@ namespace ShaleCo.Cryptography
             //Split K1 into two sub keys C and D
             Split(k1, c[0], d[0]);
 
-            Console.WriteLine();
             //Form series of C and D keys by left shifting
             for (var i = 1; i < 17; i++)
             {

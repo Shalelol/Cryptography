@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -15,31 +16,6 @@ namespace ShaleCo.Cryptography.Test
     {
         static void Main(string[] args)
         {
-            //Run through basic scenario
-            //-scenario "Message text"
-
-            //DES encrypt
-            //-DES "Message" "Key"
-
-            //-DESDecrypt "Message" "Key"
-
-            //DES3 encrypt
-            //-DES3 "Message" "Key"
-
-            //-DES3Decrypt "Message" "Key"
-
-            //RSA encrypt/decrypt
-            //-RSA "Message" "Key"
-
-            //Generate RSA key
-            //-RSAKey
-
-            //Get Hash
-            //-Hash "Message" "HashType"
-
-            //Options
-            //-FileOutput "filePath"
-
             if(args.Length < 1)
             {
                 Console.WriteLine("ShaleCo.Cryptography v1.0.0.0");
@@ -78,28 +54,287 @@ namespace ShaleCo.Cryptography.Test
 
                     Console.WriteLine("Unrecognised command. Try -help to see available commands.");
                     return;
-                case "-DES":
-                    var message = "BLAHBALBLAHasdasda".GetBytes();
-                    var key = Symmetric.Generate3DESKey();
-                    var encrypted = Symmetric.Encrypt3DES(key, message);
-                    var recovered = Symmetric.Decrypt3DES(key, encrypted);
-                    var recoveredText = recovered.GetString();
+                case "-race":
+                    if(args.Length < 2)
+                    {
+                        Console.WriteLine("Please provide a message. -race \"example\"");
+                        return;
+                    }
+                    CompareSpeeds(args[1]);
                     break;
-                case "-DESDecrypt":
-                    break;
-                case "-DES3":
-                    break;
-                case "-DES3Decrypt":
-                    break;
-                case "-RSA":
-                    break;
-                case "-RSAKey":
-                    break;
+                case "-deskey":
+                    Console.WriteLine("DES Key. 64 Bit. 8 Bytes. 56 effiective bits.");
+                    WriteByteArray(Symmetric.GenerateDESKey());
+                    return;
+                case "-des3key":
+                    Console.WriteLine("DES3 Key. 192 Bit. 24 Bytes. 168 effiective bits.");
+                    WriteByteArray(Symmetric.Generate3DESKey());
+                    return;
+                case "-des3encrypt":
+                    if(args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key in ASCII and a message.");
+                        Console.WriteLine("-des3encrypt \"abcdefghijklmnopqrstuvwx\" \"Hello World.\"");
+                        return;
+                    }
+                    var des3EncryptKey = args[1].GetBytes();
+                    if (des3EncryptKey.Length != 24)
+                    {
+                        Console.WriteLine("Key was not the correct size: 192 bits.");
+                        return;
+                    }
+
+                    Console.WriteLine("Your encrypted message:");
+                    WriteByteArray(Symmetric.Encrypt3DES(des3EncryptKey, args[2].GetBytes()));
+                    return;
+                case "-desencrypt":
+                    if(args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key in ASCII and a message.");
+                        Console.WriteLine("-desencrypt \"abcdefgh\" \"Hello World.\"");
+                        return;
+                    }
+                    var desEncryptKey = args[1].GetBytes();
+                    if (desEncryptKey.Length != 8)
+                    {
+                        Console.WriteLine("Key was not the correct size: 64 bits.");
+                        return;
+                    }
+
+                    Console.WriteLine("Your encrypted message:");
+                    WriteByteArray(Symmetric.EncryptDES(desEncryptKey, args[2].GetBytes()));
+                    return;
+                case "-des3decrypt":
+                    if(args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key in ASCII and a message.");
+                        Console.WriteLine("-des3decrypt \"abcdefghijklmnopqrstuvwx\" \"Hello World.\"");
+                        return;
+                    }
+                    var des3DecryptKey = args[1].GetBytes();
+                    if (des3DecryptKey.Length != 24)
+                    {
+                        Console.WriteLine("Key was not the correct size: 192 bits.");
+                        return;
+                    }
+                    var des3DecryptCipherText = args[2].GetBytes();
+                    if(des3DecryptCipherText.Length % 8 != 0)
+                    {
+                        Console.WriteLine("ERROR: ciphertext is not the correct size. must be a multiple of 64 bits.");
+                        return;
+                    }
+
+                    Console.WriteLine("Your decrypted message:");
+                    WriteByteArray(Symmetric.Decrypt3DES(des3DecryptKey, des3DecryptCipherText));
+                    return;
+                case "-desdecrypt":
+                    if (args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key in ASCII and a message.");
+                        Console.WriteLine("-desdecrypt \"abcdefgh\" \"Hello World.\"");
+                        return;
+                    }
+                    var desDecryptKey = args[1].GetBytes();
+                    if (desDecryptKey.Length != 8)
+                    {
+                        Console.WriteLine("Key was not the correct size: 64 bits.");
+                        return;
+                    }
+                    var desDecryptCipherText = args[2].GetBytes();
+                    if (desDecryptCipherText.Length % 8 != 0)
+                    {
+                        Console.WriteLine("ERROR: ciphertext is not the correct size. must be a multiple of 64 bits.");
+                        return;
+                    }
+
+                    Console.WriteLine("Your decrypted message:");
+                    WriteByteArray(Symmetric.DecryptDES(desDecryptKey, desDecryptCipherText));
+                    return;
+                case "-rsakey":
+                    Console.WriteLine("RSA Key Pair");
+                    Console.WriteLine(Asymmetric.GenerateRSAKeys());
+                    return;
+                case "-rsaencrypt":
+                    if(args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key pair in decimal and a message in ASCCI.");
+                        Console.WriteLine("-rsaencrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    var keys = args[1].Split(',');
+
+                    if(keys.Length != 2)
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsaencrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    BigInteger key1;
+                    BigInteger key2;
+
+                    if (!BigInteger.TryParse(keys[0], out key1))
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsaencrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    if (!BigInteger.TryParse(keys[1], out key2))
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsaencrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    var message = args[2].GetBytes();
+
+                    var cipherText = Asymmetric.EncryptRSA(new RSAKey(key1.ToByteArray(), key2.ToByteArray()), message);
+                    Console.WriteLine("Your encrypted message");
+                    WriteByteArray(cipherText);
+                    return;
+                case "-rsadecrypt":
+                    if(args.Length != 3)
+                    {
+                        Console.WriteLine("Please provide a key pair in decimal and a message in ASCCI.");
+                        Console.WriteLine("-rsadecrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    var decryptkeys = args[1].Split(',');
+
+                    if (decryptkeys.Length != 2)
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsadecrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    BigInteger decryptKey1;
+                    BigInteger decryptKey2;
+
+                    if (!BigInteger.TryParse(decryptkeys[0], out decryptKey1))
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsadecrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    if (!BigInteger.TryParse(decryptkeys[1], out decryptKey2))
+                    {
+                        Console.WriteLine("Invalid key, please provide a key pair in decimal");
+                        Console.WriteLine("-rsadecrypt 373757,198399184603 \"Hello World.\"");
+                        return;
+                    }
+
+                    var decryptMessage = args[2].GetBytes();
+
+                    var decryuptCipherText = Asymmetric.EncryptRSA(new RSAKey(decryptKey1.ToByteArray(), decryptKey2.ToByteArray()), decryptMessage);
+                    Console.WriteLine("Your decrypted message");
+                    WriteByteArray(decryuptCipherText);
+                    return;
                 case "-hash":
-                    break;
+                    if(args.Length != 2)
+                    {
+                        Console.WriteLine("Please enter a value in ASCII to hash");
+                        return;
+                    }
+                    
+                    Console.WriteLine("Custom hash.");
+                    WriteByteArray(args[1].GetHash(HashTypes.SHALE));
+                    return;
+#if DEBUG
+                case "-scenariodebug":
+                    RunBasicScenarioDebug("Hello World. Foo Bar. !@#$%^&*");
+                    return;
+#endif
                 default:
-                    break;
+                    WriteHelp();
+                    return;
             }
+        }
+
+        static void WriteHelp()
+        {
+            Console.WriteLine("Run the assignment scenario:");
+            Console.WriteLine("-scenario \"Message\"");
+            Console.WriteLine("-scenario \"Message\" -fileoutput");
+            Console.WriteLine("-scenario \"Message\" -fileoutput \"C:/output.txt\"");
+            Console.WriteLine("");
+            Console.WriteLine("Race DES3 and RSA in the encryption of a message");
+            Console.WriteLine("-race \"Message\"");
+            Console.WriteLine("");
+            Console.WriteLine("Generate encryption keys");
+            Console.WriteLine("-deskey");
+            Console.WriteLine("-des3key");
+            Console.WriteLine("-rsakey");
+            Console.WriteLine("");
+            Console.WriteLine("Encrypt an ASCII message using an ASCII key with DES3");
+            Console.WriteLine("-des3encrypt \"abcdefghijklmnopqrstuvwx\" \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Encrypt an ASCII message using an ASCII key with DES");
+            Console.WriteLine("-desencrypt \"abcdefgh\" \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Decrypt an ASCII message using an ASCII key with DES3");
+            Console.WriteLine("-des3decrypt \"abcdefghijklmnopqrstuvwx\" \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Decrypt an ASCII message using an ASCII key with DES");
+            Console.WriteLine("-desdecrypt \"abcdefgh\" \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Encrypt an ASCII message using an decimal key pair with RSA");
+            Console.WriteLine("-rsaencrypt 373757,198399184603 \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Decrypt an ASCII message using an decimal key pair with RSA");
+            Console.WriteLine("-rsadecrypt 373757,198399184603 \"Hello World.\"");
+            Console.WriteLine("");
+            Console.WriteLine("Generate a hash for any ASCII message using my special hashing algorithm.");
+            Console.WriteLine("-hash \"Message\"");
+        }
+
+        static void CompareSpeeds(string message)
+        {
+            var timer = new Stopwatch();
+
+            var messageBytes = message.GetBytes();
+            var symmetricKey = Symmetric.Generate3DESKey();
+            var asymetricKey = Asymmetric.GenerateRSAKeys();
+            
+            timer.Start();
+            for(var i = 0; i < 100; i++)
+            {
+                var encrypted = Symmetric.Encrypt3DES(symmetricKey, messageBytes);
+                var decrypted = Symmetric.Decrypt3DES(symmetricKey, encrypted);
+                if(decrypted.GetString() != message)
+                {
+                    Console.WriteLine("ERROR: Encryption Failed");
+                    return;
+                }
+            }
+            timer.Stop();
+
+            var symmetricTime = timer.ElapsedMilliseconds;
+
+            timer.Reset();
+
+            timer.Start();
+            for(var i = 0; i < 100; i++)
+            {
+                var encrypted = Asymmetric.EncryptRSA(asymetricKey.Public, messageBytes);
+                var decrypted = Asymmetric.DecryptRSA(asymetricKey.Private, encrypted);
+                if(decrypted.GetString() != message)
+                {
+                    Console.WriteLine("ERROR: Encryption Failed");
+                    return;
+                }
+            }
+            timer.Stop();
+
+            var asymetricTime = timer.ElapsedMilliseconds;
+
+            Console.WriteLine("Symmetric Encryption took {0} ms to encrypt and decrypt 100 times", symmetricTime);
+            Console.WriteLine("Asymmetric Encryption took {0} ms to encrypt and decrypt 100 times", asymetricTime);
+
         }
 
         static void RunBasicScenario(string message, bool fileOutput = false, string filePath = null)
@@ -178,11 +413,11 @@ namespace ShaleCo.Cryptography.Test
             Console.CursorLeft = 21;
             Console.Write("]");
             Console.CursorLeft = 1;
-            //for (var i = 0; i < 20; i++)
-            //{
-            //    Console.Write("-");
-            //    Thread.Sleep(300);
-            //}
+            for (var i = 0; i < 20; i++)
+            {
+                Console.Write("-");
+                Thread.Sleep(100);
+            }
             WriteGap();
 
             /** --------------------------------------------------------------------------------------- **/
@@ -251,6 +486,55 @@ namespace ShaleCo.Cryptography.Test
             }
 
             Output.Dispose();
+        }
+
+        static void RunBasicScenarioDebug(string message)
+        {
+            var messageBytes = message.GetBytes();
+
+            var hash = message.GetHash(HashTypes.SHALE);
+
+            var aliceKeys = Asymmetric.GenerateRSAKeys();
+            var bobKeys = Asymmetric.GenerateRSAKeys();
+
+            var encryptedHash = Asymmetric.EncryptRSA(aliceKeys.Private, hash);
+
+            var augmentedMessage = Helper.CombineByteArrays(messageBytes, encryptedHash);
+
+            var DES3Key = Symmetric.Generate3DESKey();
+
+            var encryptedMessage = Symmetric.Encrypt3DES(DES3Key, augmentedMessage);
+
+            var encryptedKey = Asymmetric.EncryptRSA(bobKeys.Public, DES3Key);
+
+            var transmissionMessage = Helper.CombineByteArrays(encryptedMessage, encryptedKey);
+
+            var recoveredEncryptedKey = new byte[30];
+            var recoveredCipherText = new byte[transmissionMessage.Length - recoveredEncryptedKey.Length];
+            SplitMessage(ref recoveredEncryptedKey, ref recoveredCipherText, transmissionMessage);
+
+            var decrypedDES3Key = Asymmetric.DecryptRSA(bobKeys.Private, recoveredEncryptedKey);
+
+            var decryptedMessage = Symmetric.Decrypt3DES(decrypedDES3Key, recoveredCipherText);
+
+            var recoveredSignature = new byte[5];
+            var recoveredMessage = new byte[decryptedMessage.Length - recoveredSignature.Length];
+            SplitMessage(ref recoveredSignature, ref recoveredMessage, decryptedMessage);
+
+            var decryptedHash = Asymmetric.DecryptRSA(aliceKeys.Public, recoveredSignature);
+
+            var recoveredMessageHash = recoveredMessage.GetString().GetHash(HashTypes.SHALE);
+
+            if (decryptedHash.SequenceEqual(recoveredMessageHash))
+            {
+                Console.WriteLine("Hashes are identical");
+                Console.WriteLine("This means we can be sure the message is from Alice and was unaltered");
+            }
+            else
+            {
+                Console.WriteLine("Hashes are different");
+                Console.WriteLine("This means either the message was not from Alice, or it was altered during transmission");
+            }
         }
 
         static byte[] CombineMessage(byte[] symmetricKey, byte[] ciphertext, byte[] signature)
