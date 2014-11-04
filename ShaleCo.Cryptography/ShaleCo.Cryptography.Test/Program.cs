@@ -255,6 +255,59 @@ namespace ShaleCo.Cryptography.Test
             }
         }
 
+        static void ComparisonTest()
+        {
+            var filePath = Directory.GetCurrentDirectory() + "/test.csv";
+            var lines = new List<string>();
+            var message = "AAAAAAAA";
+
+            var timer = new Stopwatch();
+
+            lines.Add("Characters,DES3,RSA");
+
+            for(var j = 0; j < 100; j++)
+            {
+                timer.Start();
+                for (var i = 0; i < 100; i++)
+                {
+                    var symmetricKey = Symmetric.Generate3DESKey();
+                    var encrypted = Symmetric.Encrypt3DES(symmetricKey, message.GetBytes());
+                    var decrypted = Symmetric.Decrypt3DES(symmetricKey, encrypted);
+                    if (decrypted.GetString() != message)
+                    {
+                        Console.WriteLine("ERROR: Encryption Failed");
+                        return;
+                    }
+                }
+                timer.Stop();
+
+                var symmetricTime = timer.ElapsedMilliseconds;
+
+                timer.Reset();
+
+                timer.Start();
+                for (var i = 0; i < 100; i++)
+                {
+                    var asymetricKey = Asymmetric.GenerateRSAKeys();
+                    var encrypted = Asymmetric.EncryptRSA(asymetricKey.Public, message.GetBytes());
+                    var decrypted = Asymmetric.DecryptRSA(asymetricKey.Private, encrypted);
+                    if (decrypted.GetString() != message)
+                    {
+                        Console.WriteLine("ERROR: Encryption Failed");
+                        return;
+                    }
+                }
+                timer.Stop();
+
+                var asymetricTime = timer.ElapsedMilliseconds;
+
+                lines.Add(string.Format("{0},{1},{2}", message.Length, symmetricTime, asymetricTime));
+                message += "AAAAAAAA";
+            }
+
+            File.WriteAllLines(filePath, lines);
+        }
+
         static void WriteHelp()
         {
             Console.WriteLine("Run the assignment scenario:");

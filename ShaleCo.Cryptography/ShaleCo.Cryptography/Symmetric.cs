@@ -226,10 +226,10 @@ namespace ShaleCo.Cryptography
         {
             int paddingNumber = bytes[bytes.Length - 1];
 
-            //if(paddingNumber > 7)
-            //{
-            //    return bytes;
-            //}
+            if (paddingNumber > 7)
+            {
+                return bytes;
+            }
 
             for(var i = 1; i <= paddingNumber; i++)
             {
