@@ -142,13 +142,49 @@ namespace ShaleCo.Cryptography.Utils
             Console.WriteLine();
         }
 
+        public static string ByteArrayToDecimalString(byte[] bytes, int grouping = 8)
+        {
+            var sb = new StringBuilder();
+
+            foreach(var b in bytes)
+            {
+                sb.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
+                sb.Append(" ");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string ByteArrayToHexString(byte[] bytes)
+        {
+            var hex = BitConverter.ToString(bytes);
+            return hex;
+        }
+
+        public static byte[] CombineByteArrays(params byte[][] arrays)
+        {
+            byte[] combined = new byte[arrays.Sum(e => e.Length)];
+            var offset = 0;
+            
+            foreach(var array in arrays)
+            {
+                Buffer.BlockCopy(array, 0, combined, offset, array.Length);
+                offset += array.Length;
+            }
+
+            return combined;
+        }
+
         public static byte[] Padding(byte[] message, int blockSize)
         {
             int remainder;
             if (message.Length > blockSize)
             {
                 remainder = message.Length % blockSize;
-                remainder = blockSize - remainder;
+                if (remainder != 0)
+                {
+                    remainder = blockSize - remainder;
+                }
             }
             else
             {
